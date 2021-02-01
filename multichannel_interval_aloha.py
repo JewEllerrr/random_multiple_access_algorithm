@@ -73,9 +73,9 @@ def interval_aloha(stream, num_of_channels, num_windows, window_size_W):
                 for j in transmitted_nodes[current_channel]:
                     user_message_queue[j][0].slots_left_before_transfer = rand.randint(1, window_size_W)
             
-            for i in range(num_of_users):
-                    if len(user_message_queue[i]) != 0:
-                        N += len(user_message_queue[i])
+        for i in range(num_of_users):
+                if len(user_message_queue[i]) != 0:
+                    N += len(user_message_queue[i])
         
     M_D = D / num_requests_quit
     M_N = N / num_windows 
@@ -85,22 +85,25 @@ def interval_aloha(stream, num_of_channels, num_windows, window_size_W):
 
 def main():
     num_windows = 10000
-    M = 2 # number of users
-    W = 2 # transmission interval
-    num_channels = 2
-    lambdas = np.arange(0.1, 1.2, 0.05)
+    M = 5 # number of users
+    W = 3 # transmission interval
+    K = 3 # number of channels
+    
+    P = 2/(W+1)
+    lambd_critical = M*P*((1-P*(1/K))**(M-1))
+    #lambd_critical = K*M*P*((1-P)**((M-1)/(K-1)))
+    print('lambda critical = ' + str(round(lambd_critical,3)))
+
+    lambdas = np.arange(0.1, 1.6, 0.05)
     list_D = []
     list_N = []
     lambdas_out_list = []
-
-    P = 2/(W+1)
-    lambd_critical = num_channels*M*P*((1-P)**(M-1))
 
     for l in lambdas:
         print("λ = ", round(l,2))
         stream = generate_stream(l, num_windows, M)
         # Interval aloha
-        M_D, M_N, lambda_out  = interval_aloha(stream, num_channels, num_windows, W)
+        M_D, M_N, lambda_out  = interval_aloha(stream, K, num_windows, W)
         print("modeling M[D] (Interval) = ", M_D)
         print("modeling M[N] (Interval) = ", M_N)
         lambdas_out_list.append(lambda_out)
@@ -110,20 +113,20 @@ def main():
 
     plt.figure(1)
     plt.xlabel('lambda')
-    plt.axvline(lambd_critical, label='lambda critical = ' + str(round(lambd_critical,2)), color='r')
+    plt.axvline(lambd_critical, label='lambda critical = ' + str(round(lambd_critical,3)), color='r')
     plt.plot(lambdas, list_D, label ='M_D (Interval)')
     plt.legend()
     plt.show()
     plt.figure(2)
     plt.xlabel('lambda')
-    plt.axvline(lambd_critical, label='lambda critical = ' + str(round(lambd_critical,2)), color='r')
-    plt.plot(lambdas, list_N, label ='M_N (Interval)')
+    plt.axvline(lambd_critical, label='lambda critical = ' + str(round(lambd_critical,3)), color='r')
+    plt.plot(lambdas, list_N, label ='M_N (Interval)', color='darkorange')
     plt.legend()
     plt.show()
     plt.figure(3)
     plt.xlabel('lambda in')
     plt.ylabel('lambda out')
-    plt.axhline(lambd_critical, label='lambda critical = ' + str(round(lambd_critical,2)), color='r')
+    plt.axhline(lambd_critical, label='lambda critical = ' + str(round(lambd_critical,3)), color='r')
     plt.plot(lambdas, lambdas_out_list, label='lambda out (Interval)', color = 'darkmagenta')
     plt.legend()
     plt.show()
